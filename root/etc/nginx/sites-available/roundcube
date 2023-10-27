@@ -1,0 +1,50 @@
+server {
+    listen 1234;
+    listen [::]:1234;
+
+    root /usr/share/roundcube;
+    index index.php index.html index.htm;
+
+    server_name roundcube;
+
+    location /api/inbox {
+       try_files $uri /api.php?$query_string;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+        fastcgi_read_timeout 300;
+    }
+}
+server {
+    listen 80;
+    listen [::]:80;
+
+    root /usr/share/roundcube;
+    index index.php index.html index.htm;
+
+    server_name roundcube;
+    location / {
+        proxy_pass http://localhost:5000/;
+    }
+
+    location /mailserver/ {
+        proxy_pass http://localhost:1234/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+        fastcgi_read_timeout 300;
+    }
+}
