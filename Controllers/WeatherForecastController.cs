@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using System.Net.Mail;
 namespace docker.Controllers;
 
 [ApiController]
@@ -21,6 +21,13 @@ public class WeatherForecastController : ControllerBase
     [HttpGet(Name = "GetWeatherForecast")]
     public IEnumerable<WeatherForecast> Get()
     {
+        var m = new MailMessage {
+            From = new MailAddress("polagorge@gmail.com"),
+        };
+        m.To.Add("pola@pola.com");
+        m.Body = "testing";
+        SmtpClient x = new SmtpClient("localhost", 587);
+        x.Send(m);
         return Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
             Date = DateTime.Now.AddDays(index),
